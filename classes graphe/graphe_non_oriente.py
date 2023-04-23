@@ -90,15 +90,19 @@ class Graphe:
 
     def parcours_en_largeur(self, sommet):
         parcours = [sommet]
+        vus = {s: False for s in self.dic_adj}
+        vus[sommet] = True
+        print(vus)
         autres = self.dic_adj[sommet].copy()
         while len(autres) > 0:
             voisin = autres.pop(0)
-            if voisin not in parcours:
+            if not vus[voisin]:
                 parcours.append(voisin)
+                vus[voisin] = True
                 for suivant in self.dic_adj[voisin]:
-                    if suivant not in parcours:
-                        autres.append(suivant)
-        return parcours
+                    if not vus[suivant]:
+                        autres.append(suivant)                            
+        return parcours 
 
 g = { "a" : ["d"],
           "b" : ["c"],
