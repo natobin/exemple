@@ -78,12 +78,15 @@ class Graphe:
     def parcours_simple(self, sommet):
         parcours = [sommet]
         autres = self.dic_adj[sommet].copy()
+        vus = {s: False for s in self.dic_adj}
+        vus[sommet] = True
         while len(autres) > 0:
             for voisin in autres:
-                if voisin not in parcours:
+                if not vus[voisin]:
                     parcours.append(voisin)
+                    vus[voisin] = True
                     for suivant in self.dic_adj[voisin]:
-                        if suivant not in parcours:
+                        if not vus[suivant]:
                             autres.append(suivant)
                 autres.remove(voisin)
         return parcours
