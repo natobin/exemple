@@ -77,59 +77,122 @@ class Graphe:
 
     def parcours_simple(self, sommet):
         parcours = [sommet]
-        autres = self.dic_adj[sommet].copy()
-        vus = {s: False for s in self.dic_adj}
-        vus[sommet] = True
-        while len(autres) > 0:
-            for voisin in autres:
-                if not vus[voisin]:
+        a_explorer = self.dic_adj[sommet].copy()
+        vus = {sommet : True}
+        while len(a_explorer) > 0:
+            for voisin in a_explorer:
+                if not voisin in vus:
                     parcours.append(voisin)
                     vus[voisin] = True
                     for suivant in self.dic_adj[voisin]:
-                        if not vus[suivant]:
-                            autres.append(suivant)
-                autres.remove(voisin)
+                        if not suivant in vus:
+                            a_explorer.append(suivant)
+                a_explorer.remove(voisin)
         return parcours
-
+      
     def parcours_en_largeur(self, sommet):
         parcours = [sommet]
-        vus = {s: False for s in self.dic_adj}
-        vus[sommet] = True
-        print(vus)
-        autres = self.dic_adj[sommet].copy()
-        while len(autres) > 0:
-            voisin = autres.pop(0)
-            if not vus[voisin]:
+        vus = {sommet:True}
+        a_explorer = self.dic_adj[sommet].copy()
+        while len(a_explorer) > 0:
+            voisin =a_explorer.pop(0)
+            if not voisin in vus:
                 parcours.append(voisin)
                 vus[voisin] = True
                 for suivant in self.dic_adj[voisin]:
-                    if not vus[suivant]:
-                        autres.append(suivant)                            
+                    if not suivant in vus:
+                        a_explorer.append(suivant)                            
         return parcours 
-   
+    
     def parcours_en_profondeur(self, sommet, parcours = None, vus = None):
         if parcours is None:
             parcours = [sommet]
-            vus = {s: False for s in self.dic_adj}
+            vus = {sommet: True}
         else:
             parcours.append(sommet)
-        vus[sommet] = True
+            vus[sommet] = True
         for voisin in self.dic_adj[sommet]:
-            if not vus[voisin]:
+            if not voisin in vus:
                 self.parcours_en_profondeur(voisin, parcours, vus)
         return parcours
-
-g = { "a" : ["d"],
-          "b" : ["c"],
-          "c" : ["b", "d", "e"],
-          "d" : ["a", "c"],
-          "e" : ["c"],
-          "f" : []
-    }
-
+    
+    def sont_relies(self, sommet1, sommet2):
+        if sommet1 == sommet2:
+            return True
+        vus = {sommet1: True}
+        a_explorer = self.dic_adj[sommet1].copy()
+        while len(a_explorer) > 0:
+            voisin = a_explorer.pop(0)
+            if voisin == sommet2:
+                return True
+            if not voisin in vus:
+                vus[voisin] = True
+                for suivant in self.dic_adj[voisin]:
+                    if not suivant in vus:
+                        a_explorer.append(suivant)                            
+        return False
+    
+    def composantes_connexes(self):
+        composantes = []
+        vus = {s:False for s in self.dic_adj}
+        for sommet in self.dic_adj:
+            if not vus[sommet]:
+                vus[sommet] = True
+                une_composante = self.parcours_en_largeur(sommet)
+                for coso in une_composante:
+                    vus[coso] = True
+                composantes.append(une_composante)
+        return composantes
+        
+            
+          
+    def trouve_chemin(self, depart, arrivee):
+        if self.sont_relies(depart, arrivee):
+            a_explorer = self.dic_adj[depart].copy()
+            vus = {voisin : depart for voisin in a_explorer}
+            vus[depart] = None
+            while len(a_explorer) > 0 and not arrivee in vus:
+                voisin =a_explorer.pop(0)
+                for suivant in self.dic_adj[voisin]:
+                    if not suivant in vus:
+                        a_explorer.append(suivant)   
+                        vus[suivant] = voisin
+            parcours = []
+            but = arrivee
+            while but is not None:
+                parcours.append(but)
+                but = vus[but]
+            parcours.reverse()
+            return parcours        
+        
+      
+      
+g = { "1" : ["2", "3"],
+      "2" : ["1", "3", "4", "5"],
+      "3" : ["1", "2", "5",  "7", "8"],
+      "4" : ["2", "5"],
+      "5" : ["2", "3", "4", "6"],
+      "6" : ["5"],
+      "7" : ["3", "8"],
+      "8" : ["3", "7"],
+      "9" : ["10"],
+      "10" : ["9"],
+      "11" : ["12"],
+      "12" : ["11", "13"],
+      "13" : ["12"]
+     }
+    
 un_graphe = Graphe(g)
-print(un_graphe.parcours_simple('e'))
 
+print("parcours", un_graphe.parcours_simple('1'))
+print("parcours en largeur", un_graphe.parcours_en_largeur('1'))
+print("parcours en profondeur", un_graphe.parcours_en_profondeur('1'))
+for s in un_graphe.parcours_en_largeur('1'):
+    assert un_graphe.sont_relies("1", s)
+assert not un_graphe.sont_relies("1","11")
+print(un_graphe.trouve_chemin("4","8"))
+print(un_graphe.trouve_chemin("4", "9"))
+print(un_graphe.composantes_connexes())
 
 
 
