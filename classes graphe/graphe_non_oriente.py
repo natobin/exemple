@@ -106,6 +106,18 @@ class Graphe:
                     if not vus[suivant]:
                         autres.append(suivant)                            
         return parcours 
+   
+    def parcours_en_profondeur(self, sommet, parcours = None, vus = None):
+        if parcours is None:
+            parcours = [sommet]
+            vus = {s: False for s in self.dic_adj}
+        else:
+            parcours.append(sommet)
+        vus[sommet] = True
+        for voisin in self.dic_adj[sommet]:
+            if not vus[voisin]:
+                self.parcours_en_profondeur(voisin, parcours, vus)
+        return parcours
 
 g = { "a" : ["d"],
           "b" : ["c"],
